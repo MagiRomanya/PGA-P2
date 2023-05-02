@@ -32,8 +32,9 @@ Material:
     m_Floats:
     - _QuadHalfLength: 1
     - _SpikeHeight: 1
-    - _TesselationFactor: 100
-    - _TesselationInnerFactor: 100
+    - _TerrainScale: 1
+    - _TesselationFactor: 75
+    - _TesselationInnerFactor: 75
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 1, g: 0.8378445, b: 0, a: 1}
   m_BuildTextureStacks: []

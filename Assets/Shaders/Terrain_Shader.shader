@@ -7,7 +7,7 @@ Shader "Custom/Terrain_Shader"
         _TesselationFactor("Tesselation Factor", int) = 2
 		_TesselationInnerFactor("Tesselation Inner Factor", int) = 2
 		_DistortionMap("Terrain Texture", 2D) = "white" {}
-		_TerrainScale("Terrain Scale", Range(1,100)) = 10
+		_TerrainScale("Terrain Scale", Range(1,1000)) = 10
     }
 
 	//--------------------------------------------------------------------------
@@ -50,7 +50,7 @@ Shader "Custom/Terrain_Shader"
 		float3 displacement = tex2Dlod(_DistortionMap, float4(v.uv/_TerrainScale ,0 , 0)).xyz;
 		float4 pos = v.vertex + float4(v.normal.x, v.normal.y, v.normal.z , 0.0f) * displacement.x;
 
-		o.vertex = UnityObjectToClipPos(pos);
+		o.vertex = pos;
 		o.normal = v.normal;
 		o.tangent = v.tangent;
 		o.uv = v.uv;
@@ -72,30 +72,36 @@ Shader "Custom/Terrain_Shader"
 	struct GeometryStage_Output
 	{
 		float4 pos: SV_POSITION;
+		float4 world_pos : POSITION1;
+		float3 normal : NORMAL;
 		float2 uv : TEXCOORD0;
 	};
 
-	GeometryStage_Output GenerateVertex(VertexStage_Output v)
+	GeometryStage_Output GenerateVertex(float3 pos, float3 normal)
 	{
 		GeometryStage_Output o;
-		o.pos = UnityObjectToClipPos(v.vertex);
+		
+		o.pos = UnityObjectToClipPos(float4(pos, 1.0f));
+		o.world_pos = mul(unity_ObjectToWorld, float4(pos, 1.0f));
+		o.normal = normal;
 		o.uv = float2(0, 0);
 		return o;
 	}
 
-	GeometryStage_Output GenerateVertex(float4 pos)
-	{
-		GeometryStage_Output o;
-		o.pos = UnityObjectToClipPos(pos);
-		o.uv = float2(0, 0);
-		return o;
-	}
-
- 	[maxvertexcount(1)]
-    void GeoShader(point VertexStage_Output IN[1], inout TriangleStream<GeometryStage_Output> triStream)
+ 	[maxvertexcount(3)]
+    void GeoShader(triangle VertexStage_Output IN[3], inout TriangleStream<GeometryStage_Output> triStream)
     {
-		float3 pos = IN[0].vertex;
-		triStream.Append(GenerateVertex(float4(pos, 1.0f)));
+		float3 pos0 = IN[0].vertex;
+		float3 pos1 = IN[1].vertex;
+		float3 pos2 = IN[2].vertex;
+
+		float3 v = pos1 - pos0;
+		float3 u = pos2 - pos0;
+		float3 normal = normalize(cross(v, u));
+
+		triStream.Append(GenerateVertex(pos0, normal));
+		triStream.Append(GenerateVertex(pos1, normal));
+		triStream.Append(GenerateVertex(pos2, normal));
     }
 
 	//--------------------------------------------------------------------------
@@ -159,7 +165,7 @@ Shader "Custom/Terrain_Shader"
             CGPROGRAM
             #pragma vertex TesselationVertShader
             #pragma fragment FragShader
-			// #pragma geometry GeoShader
+			#pragma geometry GeoShader
 			#pragma hull TessHullShader
 			#pragma domain TessDomainShader
 			#pragma target 4.6
@@ -168,10 +174,21 @@ Shader "Custom/Terrain_Shader"
 
 			float4 _Color;
 
-			float4 FragShader (GeometryStage_Output i, fixed facing : VFACE) : SV_Target
-            {	
-				return _Color;
+			float4 FragShader(GeometryStage_Output i, fixed facing : VFACE) : SV_Target
+			{
+				float3 viewDir = normalize(_WorldSpaceLightPos0 - i.world_pos.xyz);
+				float3 worldNormal = normalize(mul(unity_ObjectToWorld, float4(i.normal, 0)));
+				float a = dot(viewDir, worldNormal);
+				float3 color = _Color;
+				if (a < 0.3f) {
+					color *= 0.4;
+				}
+				else if (a < 0.5f) {
+					color *= 0.8;
+				}
+				return float4(color, 1.0f);
             }
+
             ENDCG
         }
     }
