@@ -54,7 +54,7 @@ Shader "Custom/Terrain_Shader"
 		float4 tangent : TANGENT;
 		float2 uv : TEXCOORD0;
 	};
-
+	
 	VertexStage_Output VertShader(VertexStage_Input v)
 	{
 		VertexStage_Output o;
