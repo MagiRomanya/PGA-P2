@@ -24,13 +24,21 @@ Material:
         m_Texture: {fileID: 2800000, guid: f63f065cf402f194e915df6c43690bec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _HeightMap:
+        m_Texture: {fileID: 2800000, guid: f63f065cf402f194e915df6c43690bec, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _WindDistortionMap:
         m_Texture: {fileID: 2800000, guid: f63f065cf402f194e915df6c43690bec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _HeightMultiplier: 0.78
+    - _MaxCameraLODDistance: 3
+    - _MinCameraLODDistance: 15
     - _QuadHalfLength: 1
+    - _RelativeToDistanceToCamera: 1
     - _SpikeHeight: 1
     - _TerrainScale: 1
     - _TesselationFactor: 75
