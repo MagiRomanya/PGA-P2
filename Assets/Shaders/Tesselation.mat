@@ -34,7 +34,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _HeightMultiplier: 0
+    - _HeightMultiplier: 1
     - _MaxCameraLODDistance: 10
     - _MinCameraLODDistance: 2.5
     - _QuadHalfLength: 1
